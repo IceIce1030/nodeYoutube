@@ -19,7 +19,9 @@ var nexPageToken = ''; //  yt nextPage token
 var {
   channelTitle,
   count,
-  saveDatePath
+  channelId,
+  saveDatePath,
+  searchChannel
 } = require('./config');
 // MongoDB function
 var MongoDB = require('./MongoDB');
@@ -40,7 +42,7 @@ fs.readFile('client_secret1.json', function processClientSecrets(err, content) {
   }
 
   var obj = {
-    keyword: channelTitle,
+    keyword: searchChannel.channelTitle,
     content
   };
   client_content = content;
@@ -234,7 +236,7 @@ function searchVideos(option) {
       var resData = response.data;
       var videos = [];
       resData.items.forEach(item => {
-        if (item.snippet.channelTitle === channelTitle) {
+        if (item.snippet.channelTitle === searchChannel.channelTitle) {
           if (channelData === '') {
             // 處理頻道 table
             channelData = {
@@ -262,8 +264,10 @@ function searchVideos(option) {
     params: {
       maxResults: count,
       part: 'snippet',
-      q: keyword,
-      type: 'video'
+      // q: keyword,
+      channelId: searchChannel.channelId,
+      type: 'video',
+      order: 'date',
     }
   };
   if (option.pageToken) _requestData.params.pageToken = option.pageToken;
@@ -415,7 +419,7 @@ function insertVideosToUniqueTable(data) {
   // 是否還有下一頁
   if (nexPageToken !== '') {
     var obj = {
-      keyword: channelTitle,
+      keyword: searchChannel.channelTitle,
       pageToken: nexPageToken,
       content: client_content
     };
