@@ -220,6 +220,7 @@ function searchListByKeyword(auth, requestData) {
     var dateAlbum = response.data.items;
   });
 }
+let recordData = '';
 
 // 從 yt data api 取得 videos
 function searchVideos(option) {
@@ -238,16 +239,15 @@ function searchVideos(option) {
       if (nexPageToken == '') {
         // 紀錄 record]
         const firstVideo = response.data.items[0];
-        let record = {
+        recordData = {
           channelId: firstVideo.snippet.channelId,
           channelTitle: firstVideo.snippet.channelTitle,
           videoId: firstVideo.id.videoId,
           publishedAt: firstVideo.snippet.publishedAt
         };
-        checkRecord(record, recordCallback);
+        checkRecord(recordData, recordCallback);
       } else {
-        // recordCallback();
-        checkRecord(record, recordCallback);
+        recordCallback();
       }
 
       // search videos function
@@ -258,7 +258,6 @@ function searchVideos(option) {
         var channelData = '';
         var resData = response.data;
         var videos = [];
-        // return false;
         for (var i = 0; i < resData.items.length; i++) {
           var item = resData.items[i];
           if (item.snippet.channelTitle === searchChannel.channelTitle) {
@@ -271,22 +270,17 @@ function searchVideos(option) {
               };
               channelHandler(channelData);
             }
-            console.log('newVideo is => ', newVideo);
-            console.log('item is => ', item);
-            if (
-              newVideo.ops.videoId === item.id.videoId
+            if (newVideo !== '' &&
+              newVideo.videoId === item.id.videoId
             ) {
               nexPageToken = '';
               newVideo = '';
-              console.log(`已經到了最新影片！ videoId is ${item.id.videoId}`);
+              console.log(`已經到了最新影片，停止新增！最新影片 videoId is ${item.id.videoId}`);
               break;
-            } else {
-              videos.push(item);
-            }
+            } else videos.push(item);
           }
         }
         // console.log(videos)
-        // return false;
         var obj = {
           videos,
           channelId: channelData.channelId
@@ -304,10 +298,10 @@ function searchVideos(option) {
     params: {
       maxResults: count,
       part: 'snippet',
-      // q: keyword,
+      // q: keyword, // 關鍵字搜尋
       channelId: searchChannel.channelId,
-      type: 'video',
-      order: 'date'
+      type: 'video', // 搜尋型態
+      order: 'date' // 已發佈日期排序
     }
   };
   if (option.pageToken) _requestData.params.pageToken = option.pageToken;
@@ -350,7 +344,7 @@ function insertChannel(channelData, callback) {
         );
         callback(result);
       });
-      db.close(); //關閉連線\
+      db.close(); //關閉連線
     }
   );
 }
@@ -406,8 +400,8 @@ const findChannel = function ({
 
 // insert videos to totalTable
 /*
-  option.videos (array)
-  option.channelId (string)
+  option.videos (array) 要寫入的影片
+  option.channelId (string) 頻道id
 */
 function insertVideos(option, callback) {
   var ch_id = option.channelId;
@@ -507,7 +501,6 @@ function checkRecord(logData, _recordCallback) {
       var database = db.db('mydb');
       const collection = database.collection('record');
       // Find some documents
-      // logData.videoId += '1234';
       collection
         .find({
           videoId: logData.videoId
@@ -523,7 +516,7 @@ function checkRecord(logData, _recordCallback) {
             recordLog(logData, _recordCallback);
           } else {
             console.log(
-              `Channel [${logData.channelTitle}] don't has new video!(todo)`
+              `Channel [${logData.channelTitle}] don't has new video!`
             );
           }
         });
@@ -557,21 +550,19 @@ function recordLog(logData, callback) {
         console.log(
           'Inserted ' + record.length + ' record into the collection(record)'
         );
-        newVideo = result;
-        callback(result);
       });
       // 寫入自己的table
       const uniq_collection = database.collection(
         `${logData.channelId}_record`
       );
-      // (todo) 要去unique 那個資料夾把資料放入 newVideo 在清空資料表
+      // 去unique 那個資料夾把資料放入 newVideo ，再來清空資料表
       uniq_collection
         .find()
         .toArray(function (err, docs) {
           if (err) throw err;
           assert.equal(err, null);
-          newVideo = docs[0];
-
+          if (docs.length != 0) newVideo = docs[0];
+          console.log('newVideo => ', newVideo);
           uniq_collection
             .drop()
             .then(function () {
@@ -594,34 +585,10 @@ function recordLog(logData, callback) {
                         }_record})`
                 );
               });
+              callback(record);
               db.close(); //關閉連線
             });
         })
-
-      // uniq_collection
-      //   .drop()
-      //   .then(function() {
-      //     // success
-      //     assert.equal(err, null);
-      //     // if (result) console.log('drop collection complete!');
-      //   })
-      //   .catch(function() {
-      //     // error handling
-      //     // console.log('error handling');
-      //   })
-      //   .finally(function() {
-      //     uniq_collection.insertMany(record, function(err, result) {
-      //       assert.equal(err, null);
-      //       assert.equal(record.length, result.result.n);
-      //       assert.equal(record.length, result.ops.length);
-      //       console.log(
-      //         `Inserted  ${record.length} record into the collection(${
-      //           logData.channelId
-      //         }_record})`
-      //       );
-      //     });
-      //     db.close(); //關閉連線
-      //   });
     }
   );
 }
