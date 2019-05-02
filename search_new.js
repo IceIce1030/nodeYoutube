@@ -246,7 +246,8 @@ function searchVideos(option) {
         };
         checkRecord(record, recordCallback);
       } else {
-        recordCallback();
+        // recordCallback();
+        checkRecord(record, recordCallback);
       }
 
       // search videos function
@@ -270,10 +271,13 @@ function searchVideos(option) {
               };
               channelHandler(channelData);
             }
-            console.log('newVideo => ', newVideo);
+            console.log('newVideo is => ', newVideo);
             console.log('item is => ', item);
-            if (newVideo.result.ok === 1 && newVideo.ops.videoId === item.id.videoId) {
+            if (
+              newVideo.ops.videoId === item.id.videoId
+            ) {
               nexPageToken = '';
+              newVideo = '';
               console.log(`已經到了最新影片！ videoId is ${item.id.videoId}`);
               break;
             } else {
@@ -347,7 +351,8 @@ function insertChannel(channelData, callback) {
         callback(result);
       });
       db.close(); //關閉連線\
-    });
+    }
+  );
 }
 // 檢查使否有新增過頻道，將頻道資訊新增 mongodb
 function channelHandler(channelData) {
@@ -374,7 +379,8 @@ function channelHandler(channelData) {
       };
       findChannel(obj);
       //Write database Insert/Update/Query code here..
-    });
+    }
+  );
 }
 // find channel
 const findChannel = function ({
@@ -442,7 +448,8 @@ function insertVideos(option, callback) {
           callback(videos);
         });
         db.close(); //關閉連線
-      });
+      }
+    );
   }
 }
 
@@ -465,16 +472,17 @@ function insertVideosToUniqueTable(data) {
         assert.equal(data.length, result.ops.length);
         console.log(
           `Inserted ' ${data.length} ${tableName} into the collection(${
-          data[0].channelId
-        }_videos)`
+            data[0].channelId
+          }_videos)`
         );
       });
       db.close(); //關閉連線
-    });
+    }
+  );
 
   // 是否還有下一頁
   if (nexPageToken !== '') {
-    console.log('還有下一頁')
+    console.log('還有下一頁');
     // 還有資料
     var obj = {
       keyword: searchChannel.channelTitle,
@@ -484,7 +492,7 @@ function insertVideosToUniqueTable(data) {
     searchVideos(obj);
   } else {
     // 最後一頁
-    console.log('最後一頁')
+    console.log('最後一頁');
     nexPageToken = '';
   }
 }
@@ -557,33 +565,63 @@ function recordLog(logData, callback) {
         `${logData.channelId}_record`
       );
       // (todo) 要去unique 那個資料夾把資料放入 newVideo 在清空資料表
-      uniq_collection.find()
+      uniq_collection
+        .find()
         .toArray(function (err, docs) {
           if (err) throw err;
           assert.equal(err, null);
           newVideo = docs[0];
-        });
-      
-      uniq_collection.drop().then(function () {
-        // success
-        assert.equal(err, null);
-        // if (result) console.log('drop collection complete!');
-      }).catch(function () {
-        // error handling
-        // console.log('error handling');
-      }).finally(function () {
-        uniq_collection.insertMany(record, function (err, result) {
-          assert.equal(err, null);
-          assert.equal(record.length, result.result.n);
-          assert.equal(record.length, result.ops.length);
-          console.log(
-            `Inserted  ${record.length} record into the collection(${
-                logData.channelId
-              }_record})`
-          );
-        });
-        db.close(); //關閉連線
-      });
+
+          uniq_collection
+            .drop()
+            .then(function () {
+              // success
+              assert.equal(err, null);
+              // if (result) console.log('drop collection complete!');
+            })
+            .catch(function () {
+              // error handling
+              // console.log('error handling');
+            })
+            .finally(function () {
+              uniq_collection.insertMany(record, function (err, result) {
+                assert.equal(err, null);
+                assert.equal(record.length, result.result.n);
+                assert.equal(record.length, result.ops.length);
+                console.log(
+                  `Inserted  ${record.length} record into the collection(${
+                          logData.channelId
+                        }_record})`
+                );
+              });
+              db.close(); //關閉連線
+            });
+        })
+
+      // uniq_collection
+      //   .drop()
+      //   .then(function() {
+      //     // success
+      //     assert.equal(err, null);
+      //     // if (result) console.log('drop collection complete!');
+      //   })
+      //   .catch(function() {
+      //     // error handling
+      //     // console.log('error handling');
+      //   })
+      //   .finally(function() {
+      //     uniq_collection.insertMany(record, function(err, result) {
+      //       assert.equal(err, null);
+      //       assert.equal(record.length, result.result.n);
+      //       assert.equal(record.length, result.ops.length);
+      //       console.log(
+      //         `Inserted  ${record.length} record into the collection(${
+      //           logData.channelId
+      //         }_record})`
+      //       );
+      //     });
+      //     db.close(); //關閉連線
+      //   });
     }
   );
 }

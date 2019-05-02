@@ -2,11 +2,11 @@ const channelTitle = '同居時代 Co-Living'; // 關鍵字搜尋 keyword 同居
 const count = 50; // 數量(1-50) 每次api回來資料數量
 var saveDatePath = 'searchData/'; // save json path
 const channelId = 'UCQs0BeBhkbUN8K_J-vf6R3Q';
-const searchChannel = {
+const searchChannel_1 = {
   channelTitle: '同居時代 Co-Living',
   channelId: 'UCQs0BeBhkbUN8K_J-vf6R3Q',
 }
-const searchChannel_1 = {
+const searchChannel = {
   channelTitle: '木曜4超玩',
   channelId: 'UCLW_SzI9txZvtOFTPDswxqg',
 }
