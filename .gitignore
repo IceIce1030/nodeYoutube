@@ -1,5 +1,5 @@
-# client_secret.json
-# client_secret1.json
+client_secret.json
+client_secret1.json
 .DS_Store
 node_modules
 /dist
