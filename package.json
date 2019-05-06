@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cron": "^1.7.1",
     "google-auth-library": "^3.1.0",
     "googleapis": "^38.0.0",
     "mongodb": "^3.1.13"
