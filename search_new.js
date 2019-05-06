@@ -46,6 +46,23 @@ fs.readFile('client_secret1.json', function processClientSecrets(err, content) {
     content
   };
   client_content = content;
+  // CronJob(cronTime, onTick, onComplete, start, timezone, context, runOnInit, unrefTimeout)
+  /*
+    cronTime [必需] 配置定時任務的時間，可以使用這可以是 cron 語法或 JS Date對象的形式。
+    onTick [必需] 在指定時間觸發的回調。
+    onComplete [可選]在作業停止時將觸發的回調。
+    啟動[可選]指定是否在退出構造函數之前啟動作業，默認情況下，此值設置為false。
+    timeZone [可選]  - 指定執行的時區。這將修改相對於您的時區的實際時間，不設置為當前所在時區。設置為Europe / London為UTC 0時區
+
+    時間參數
+    * * * * * * =>
+    Seconds(秒): 0-59
+    Minutes(分鍾): 0-59
+    Hours(小時): 0-23
+    Day of Month:(天) 1-31
+    Months(月份): 0-11 (Jan-Dec)
+    Day of Week(星期幾): 0-6 (Sun-Sat)
+  */
   new CronJob(
     '0 0 12 * * *',
     function() {
